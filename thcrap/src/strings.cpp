@@ -455,11 +455,14 @@ HANDLE WINAPI strings_CreateFileA(
 extern "C" size_t BP_strings_lookup(x86_reg_t * regs, json_t * bp_info)
 {
 	const char **string = (const char**)json_object_get_pointer(bp_info, regs, "str");
-#if 0
-	char *utf8str = EnsureUTF8(*string, strlen(*string));
-	log_printf("[BP_strings_lookup] %p: %s\n", *string - (char*)GetModuleHandle(nullptr) , utf8str);
-	free(utf8str);
-#endif
+	bool log = json_is_true(json_object_get(bp_info, "log"));
+
+	if (log) {
+		char *utf8str = EnsureUTF8(*string, strlen(*string));
+		log_printf("[BP_strings_lookup] %p: %s\n", *string - (char*)GetModuleHandle(nullptr), utf8str);
+		free(utf8str);
+	}
+
 	*string = strings_lookup(*string, NULL);
 	return 1;
 }
